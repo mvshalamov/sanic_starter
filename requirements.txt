@@ -1,0 +1,18 @@
+jsonschema==2.5.1
+uvloop==0.8.0
+sanic==0.5.4
+jsonschema==2.5.1
+manage.py==0.2.10
+asyncpg==0.11.0
+psycopg2==2.7.3
+
+# Migrations
+yoyo-migrations==5.0.5
+
+# Development & Testing
+py==1.4.31
+pytest==3.0.2
+pytest-cov==2.3.1
+pytest-env==0.6.0
+coverage==4.2
+aiohttp==2.0.6-1
