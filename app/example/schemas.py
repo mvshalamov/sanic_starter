@@ -1,4 +1,4 @@
-INSERT_TEST = {
+POST_TEST = {
     "type": "object",
     "additionalProperties": False,
     "required": ["name"],

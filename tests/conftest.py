@@ -1,16 +1,15 @@
-from urllib.parse import urlparse
-
 from contextlib import contextmanager
 from subprocess import Popen, PIPE
+from urllib.parse import urlparse
 
 import psycopg2
-from psycopg2 import pool
 import pytest
+from psycopg2 import pool
 
-from app.main import application
 from app import settings
+from app.main import application
 
-db_param =urlparse(settings.DATABASE_URL)
+db_param = urlparse(settings.DATABASE_URL)
 TEST_DB = db_param.path[1:]
 TEST_USER = db_param.username
 TEST_PWD = db_param.password
@@ -36,7 +35,7 @@ def fix_db(request):
     # Create database
     with psycopg2.connect(
             'host={0} dbname=postgres user={1} password={2}'.format(TEST_HOST, TEST_USER, TEST_PWD)
-        ) as conn:
+    ) as conn:
         conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
         with conn.cursor() as cur:
             cur.execute('CREATE DATABASE %s' % TEST_DB)
@@ -65,7 +64,7 @@ def fix_db(request):
     db = pool.SimpleConnectionPool(
         14, 14, host=TEST_HOST, database=TEST_DB, user=TEST_USER, password=TEST_PWD, port=5432
     )
-    
+
     @contextmanager
     def get_cursor():
         con = db.getconn()
@@ -87,10 +86,12 @@ def clean_table(request, fix_db):
     Usage:
     @pytest.mark.parametrize('clean_table', [(Log, Route)], indirect=True)
     """
-    def teardown():        
+
+    def teardown():
         # with async_db.getconn() as connection:
         #     with connection.cursor() as cur:
         with fix_db() as cur:
             for param in request.param:
                 cur.execute('delete from %s;' % param)
+
     request.addfinalizer(teardown)
