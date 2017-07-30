@@ -1,64 +1,43 @@
 from sanic.response import json
 
-from jsonschema import validate
-from jsonschema.exceptions import ValidationError
-from sanic.views import HTTPMethodView
-
-from app.example.schemas import INSERT_TEST, GET_TEST
+from app.example.schemas import POST_TEST, GET_TEST
 from app.example.sql import INSERT_SQL, GET_SQL
+from utils import JsonSchemaHTTPMethodView, ApiError, get_result_dict
 
 
 async def ping(request):
     """
     ping
     """
-    res = {'answer': 'pong'}
     async with request.app.pool.acquire() as connection:
         sql = "SELECT 1;"
         await connection.execute(sql)
-    return json(res)
+    return json(get_result_dict('pong'))
 
 
-class THandler(HTTPMethodView):
+class THandler(JsonSchemaHTTPMethodView):
+    _schemas = {
+        'GET': GET_TEST,
+        'POST': POST_TEST
+    }
+
     async def get(self, request):
-        print(request.args.items())
-        input_args = {i: k[0] for i, k in request.args.items()}
-        res = {'success': True}
-        try:
-            validate(input_args, GET_TEST)
-        except ValidationError as e:
-            res['success'] = False
-            res['errors'] = [str(e)]
-            return json(res, status=400)
-
         async with request.app.pool.acquire() as connection:
             result = await connection.fetch(
                 GET_SQL
             )
 
-        res['answer'] = result
-
-        return json(res)
+        return json(get_result_dict(result))
 
     async def post(self, request):
-        res = {'success': True}
-
-        input_args = request.json
-
-        try:
-            validate(input_args, INSERT_TEST)
-        except ValidationError as e:
-            res['success'] = False
-            res['errors'] = [str(e)]
-            return json(res, status=400)
-
         async with request.app.pool.acquire() as connection:
             id_res, = await connection.fetchrow(
                 INSERT_SQL,
-                input_args['name']
+                # JSON request body after validation is stored in self._data
+                self._data['name']
             )
 
-        res['success'] = True
-        res['answer'] = id_res
+        return json(get_result_dict(id_res))
 
-        return json(res)
+    async def put(self, request):
+        raise ApiError(['Test API error'], 400)

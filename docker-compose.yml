@@ -4,8 +4,6 @@ services:
         build: .
         ports:
             - "8300:8000"
-        links:
-            - pg
         volumes:
             - .:/usr/src/app
         command: python -m http.server 6000

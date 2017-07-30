@@ -1,7 +1,4 @@
-import pytest
-
-
-def test_check_404(app):
+def test_check_400(app):
     """
     """
     url = '/api/v1/thandler?iteration_id=%s&link=%s' % (
